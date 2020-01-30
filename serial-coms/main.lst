@@ -1,0 +1,160 @@
+   1               		.file	"main.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               		.section	.rodata.str1.1,"aMS",@progbits,1
+  11               	.LC0:
+  12 0000 4865 6C6C 		.string	"Hello world!"
+  12      6F20 776F 
+  12      726C 6421 
+  12      00
+  13               	.LC1:
+  14 000d 596F 7520 		.string	"You wrote %c\n"
+  14      7772 6F74 
+  14      6520 2563 
+  14      0A00 
+  15               		.section	.text.startup,"ax",@progbits
+  16               	.global	main
+  18               	main:
+  19               	.LFB1:
+  20               		.file 1 "main.c"
+   1:main.c        **** /*
+   2:main.c        ****  * Demonstration on how to redirect stdio to UART. 
+   3:main.c        ****  *
+   4:main.c        ****  * http://appelsiini.net/2011/simple-usart-with-avr-libc
+   5:main.c        ****  *
+   6:main.c        ****  * To compile and upload run: make clean; make; make program;
+   7:main.c        ****  * Connect to serial with: screen /dev/tty.usbserial-*
+   8:main.c        ****  *
+   9:main.c        ****  * Copyright 2011 Mika Tuupola
+  10:main.c        ****  *
+  11:main.c        ****  * Licensed under the MIT license:
+  12:main.c        ****  *   http://www.opensource.org/licenses/mit-license.php
+  13:main.c        ****  *
+  14:main.c        ****  */
+  15:main.c        ****  
+  16:main.c        **** #include <stdio.h>
+  17:main.c        **** 
+  18:main.c        **** #include "main.h"
+  19:main.c        **** #include "uart.h"
+  20:main.c        **** 
+  21:main.c        **** int main(void) {    
+  21               		.loc 1 21 0
+  22               		.cfi_startproc
+  23               	/* prologue: function */
+  24               	/* frame size = 0 */
+  25               	/* stack size = 0 */
+  26               	.L__stack_usage = 0
+  22:main.c        **** 
+  23:main.c        ****     uart_init();
+  27               		.loc 1 23 0
+  28 0000 0E94 0000 		call uart_init
+  29               	.LVL0:
+  24:main.c        ****     stdout = &uart_output;
+  30               		.loc 1 24 0
+  31 0004 80E0      		ldi r24,lo8(uart_output)
+  32 0006 90E0      		ldi r25,hi8(uart_output)
+  33 0008 9093 0000 		sts __iob+2+1,r25
+  34 000c 8093 0000 		sts __iob+2,r24
+  25:main.c        ****     stdin  = &uart_input;
+  35               		.loc 1 25 0
+  36 0010 80E0      		ldi r24,lo8(uart_input)
+  37 0012 90E0      		ldi r25,hi8(uart_input)
+  38 0014 9093 0000 		sts __iob+1,r25
+  39 0018 8093 0000 		sts __iob,r24
+  26:main.c        ****                 
+  27:main.c        ****     char input;
+  28:main.c        **** 
+  29:main.c        ****     while(1) {
+  30:main.c        ****         puts("Hello world!");
+  31:main.c        ****         input = getchar();
+  32:main.c        ****         printf("You wrote %c\n", input);        
+  40               		.loc 1 32 0
+  41 001c C0E0      		ldi r28,lo8(.LC1)
+  42 001e D0E0      		ldi r29,hi8(.LC1)
+  43               	.L2:
+  30:main.c        ****         input = getchar();
+  44               		.loc 1 30 0 discriminator 1
+  45 0020 80E0      		ldi r24,lo8(.LC0)
+  46 0022 90E0      		ldi r25,hi8(.LC0)
+  47 0024 0E94 0000 		call puts
+  48               	.LVL1:
+  31:main.c        ****         printf("You wrote %c\n", input);        
+  49               		.loc 1 31 0 discriminator 1
+  50 0028 8091 0000 		lds r24,__iob
+  51 002c 9091 0000 		lds r25,__iob+1
+  52 0030 0E94 0000 		call fgetc
+  53               	.LVL2:
+  54               		.loc 1 32 0 discriminator 1
+  55 0034 9927      		clr r25
+  56               	.LVL3:
+  57 0036 9F93      		push r25
+  58               	.LCFI0:
+  59               		.cfi_def_cfa_offset 3
+  60 0038 8F93      		push r24
+  61               	.LCFI1:
+  62               		.cfi_def_cfa_offset 4
+  63 003a DF93      		push r29
+  64               	.LCFI2:
+  65               		.cfi_def_cfa_offset 5
+  66 003c CF93      		push r28
+  67               	.LCFI3:
+  68               		.cfi_def_cfa_offset 6
+  69 003e 0E94 0000 		call printf
+  70               	.LVL4:
+  71 0042 0F90      		pop __tmp_reg__
+  72 0044 0F90      		pop __tmp_reg__
+  73 0046 0F90      		pop __tmp_reg__
+  74 0048 0F90      		pop __tmp_reg__
+  75               	.LCFI4:
+  76               		.cfi_def_cfa_offset 2
+  77 004a 00C0      		rjmp .L2
+  78               		.cfi_endproc
+  79               	.LFE1:
+  81               	.global	uart_input
+  82               		.data
+  85               	uart_input:
+  86 0000 0000 00   		.zero	3
+  87 0003 01        		.byte	1
+  88 0004 0000 0000 		.zero	4
+  89 0008 0000      		.word	0
+  90 000a 0000      		.word	gs(uart_getchar)
+  91 000c 0000      		.word	0
+  92               	.global	uart_output
+  95               	uart_output:
+  96 000e 0000 00   		.zero	3
+  97 0011 02        		.byte	2
+  98 0012 0000 0000 		.zero	4
+  99 0016 0000      		.word	gs(uart_putchar)
+ 100 0018 0000      		.word	0
+ 101 001a 0000      		.word	0
+ 102               		.text
+ 103               	.Letext0:
+ 104               		.file 2 "/usr/lib/avr/include/stdio.h"
+ 105               		.file 3 "/usr/lib/avr/include/stdint.h"
+ 106               		.file 4 "uart.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main.c
+     /tmp/ccjxWeO8.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccjxWeO8.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccjxWeO8.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccjxWeO8.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccjxWeO8.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccjxWeO8.s:18     .text.startup:0000000000000000 main
+     /tmp/ccjxWeO8.s:95     .data:000000000000000e uart_output
+     /tmp/ccjxWeO8.s:85     .data:0000000000000000 uart_input
+
+UNDEFINED SYMBOLS
+uart_init
+__iob
+puts
+fgetc
+printf
+uart_getchar
+uart_putchar
+__do_copy_data
